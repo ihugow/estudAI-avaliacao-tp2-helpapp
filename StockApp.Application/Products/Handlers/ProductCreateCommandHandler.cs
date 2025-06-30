@@ -23,7 +23,7 @@ namespace StockApp.Application.Products.Handlers
             CancellationToken cancellationToken)
         {
             var product = new Product(request.Name, request.Description, request.Price,
-                request.Stock, request.Image);
+                request.Stock, request.Image, request.CategoryId);
 
             if(product == null)
             {
@@ -31,7 +31,6 @@ namespace StockApp.Application.Products.Handlers
             }
             else
             {
-                product.CategoryId= request.CategoryId;
                 return await _productRepository.Create(product);
             }
         }

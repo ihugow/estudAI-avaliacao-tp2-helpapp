@@ -28,15 +28,15 @@ namespace StockApp.Application.Services
             await _productRepository.Create(productEntity);
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetProducts()
+        public async Task<IEnumerable<ProductDTO>> GetProductsAsync()
         {
             var productsEntity = await _productRepository.GetProducts();
             return _mapper.Map<IEnumerable<ProductDTO>>(productsEntity);
         }
 
-        public async Task<ProductDTO> GetProductById(int? id)
+        public async Task<ProductDTO> GetByIdAsync(int? id)
         {
-            var productEntity = _productRepository.GetById(id);
+            var productEntity = await _productRepository.GetById(id);
             return _mapper.Map<ProductDTO>(productEntity);
         }
 
