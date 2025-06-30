@@ -28,7 +28,7 @@ namespace StockApp.API.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetProduct")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -37,6 +37,17 @@ namespace StockApp.API.Controllers
                 return NotFound("Product not found.");
             }
             return Ok(product);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ProductDTO>> Post([FromBody] ProductDTO productDto)
+        {
+            if (productDto == null)
+            {
+                return BadRequest("Invalid Data.");
+            }
+            await _productService.Add(productDto);
+            return new CreatedAtRouteResult("GetProduct", new { id = productDto.Id }, productDto);
         }
     }
 }
