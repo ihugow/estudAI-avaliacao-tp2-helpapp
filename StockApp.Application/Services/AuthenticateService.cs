@@ -40,7 +40,14 @@ namespace StockApp.Application.Services
                 if (user == null) return new TokenResponseDto(false, new List<string> { "Usuário não encontrado." });
 
                 var token = GenerateJwtToken(user);
-                return new TokenResponseDto(token, null, _jwtSettings.ExpireMinutes * 60, true);
+                var refreshToken = GenerateRefreshToken();
+
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpireDays);
+
+                await _userManager.UpdateAsync(user);
+
+                return new TokenResponseDto(token, refreshToken, _jwtSettings.ExpireMinutes * 60, true);
             }
 
             return new TokenResponseDto(false, new List<string> { "Credenciais inválidas." });
@@ -89,6 +96,53 @@ namespace StockApp.Application.Services
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        private static string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+        public async Task<TokenResponseDto> RefreshToken(TokenRequestDto tokenRequestDto)
+        {
+            var principal = GetPrincipalFromExpiredToken(tokenRequestDto.Token);
+            var user = await _userManager.FindByEmailAsync(principal.Identity.Name);
+
+            if (user == null || user.RefreshToken != tokenRequestDto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return new TokenResponseDto(false, new List<string> { "Invalid client request" });
+            }
+
+            var newJwtToken = GenerateJwtToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            await _userManager.UpdateAsync(user);
+
+            return new TokenResponseDto(newJwtToken, newRefreshToken, _jwtSettings.ExpireMinutes * 60, true);
+        }
+
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false, 
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key)),
+                ValidateLifetime = false
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("Invalid token");
+
+            return principal;
         }
     }
 }

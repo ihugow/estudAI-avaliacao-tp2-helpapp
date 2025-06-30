@@ -7,5 +7,6 @@ namespace StockApp.Application.Interfaces
         Task<TokenResponseDto> Authenticate(UserLoginDto userLoginDto);
         Task<TokenResponseDto> RegisterUser(UserRegisterDto userRegisterDto);
         Task<TokenResponseDto> Logout();
+        Task<TokenResponseDto> RefreshToken(TokenRequestDto tokenRequestDto);
     }
 }
