@@ -19,23 +19,23 @@ namespace StockApp.Domain.Entities
         public int CategoryId { get; set; }
         #endregion
 
-        public Product(string name, string description, decimal price, int stock, string image)
+        public Product(string name, string description, decimal price, int stock, string image, int categoryId)
         {
-            ValidateDomain(name, description, price, stock, image);
+            ValidateDomain(name, description, price, stock, image, categoryId);
         }
 
-        public Product(int id, string name, string description, decimal price, int stock, string image)
+        public Product(int id, string name, string description, decimal price, int stock, string image, int categoryId)
         {
             DomainExceptionValidation.When(id < 0, "Update Invalid Id value");
             Id= id;
-            ValidateDomain(name, description, price, stock, image);
+            ValidateDomain(name, description, price, stock, image, categoryId);
         }
 
 
 
         public Category Category { get; set; }
 
-        private void ValidateDomain(string name, string description, decimal price, int stock, string image)
+        private void ValidateDomain(string name, string description, decimal price, int stock, string image, int categoryId)
         {
             DomainExceptionValidation.When(string.IsNullOrEmpty(name),
                 "Invalid name, name is required.");
@@ -55,6 +55,10 @@ namespace StockApp.Domain.Entities
 
             DomainExceptionValidation.When(image.Length > 250, "Invalid image name, too long, maximum 250 characters.");
 
+            DomainExceptionValidation.When(string.IsNullOrEmpty(image),
+                "Invalid image, image is required.");
+
+            DomainExceptionValidation.When(categoryId <= 0, "Invalid category Id, category Id is required.");
         }
     }
 }
