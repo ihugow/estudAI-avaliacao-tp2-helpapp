@@ -12,10 +12,12 @@ namespace StockApp.API.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IImageService _imageService;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, IImageService imageService)
         {
             _productService = productService;
+            _imageService = imageService;
         }
 
         [HttpGet]
@@ -84,6 +86,25 @@ namespace StockApp.API.Controllers
             }
             await _productService.Remove(id);
             return NoContent();
+        }
+
+        [HttpPost("upload-image")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<string>> UploadImage([FromForm] IFormFile file)
+        {
+            try
+            {
+                var imageUrl = await _imageService.UploadImageAsync(file);
+                return Ok(imageUrl);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using StockApp.API.Middlewares;
 using StockApp.Application.Services;
 using StockApp.Application.Configurations;
+using StockApp.API.Services;
 
 internal class Program
 {
@@ -16,6 +17,7 @@ internal class Program
         // Configure Stock Replenishment Settings
         builder.Services.Configure<StockReplenishmentSettings>(builder.Configuration.GetSection("StockReplenishmentSettings"));
         builder.Services.AddHostedService<StockReplenishmentService>(); // Register the background service
+        builder.Services.AddScoped<StockApp.Application.Interfaces.IImageService, StockApp.API.Services.ImageService>(); // Register ImageService
 
         builder.Services.AddControllers();
 

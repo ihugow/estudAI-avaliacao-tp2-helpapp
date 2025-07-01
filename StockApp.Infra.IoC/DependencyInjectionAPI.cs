@@ -36,7 +36,7 @@ namespace StockApp.Infra.IoC
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IAuthenticateService, AuthenticateService>();
-            services.AddScoped<ISignInService, ConcreteSignInService>(); // Add this line
+            services.AddScoped<ISignInService, ConcreteSignInService>();
 
             services.AddAutoMapper(typeof(DomainToDTOMappingProfile));
 
@@ -49,6 +49,7 @@ namespace StockApp.Infra.IoC
 
             // JWT Configuration
             services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+            services.Configure<ImageUploadSettings>(configuration.GetSection("ImageUploadSettings")); // Add this line
 
             services.AddAuthentication(options =>
             {
