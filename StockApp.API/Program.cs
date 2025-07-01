@@ -22,7 +22,7 @@ internal class Program
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}",
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
             });
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {

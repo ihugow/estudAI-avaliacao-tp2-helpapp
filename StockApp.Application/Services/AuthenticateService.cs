@@ -9,29 +9,29 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using StockApp.Infra.Data.Identity;
+using Microsoft.Extensions.Options;
 
 namespace StockApp.Application.Services
 {
     public class AuthenticateService : IAuthenticateService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ISignInService _signInService;
         private readonly JwtSettings _jwtSettings;
 
         public AuthenticateService(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration)
+            ISignInService signInService,
+            IOptions<JwtSettings> jwtSettingsOptions)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
-            _jwtSettings = new JwtSettings();
-            configuration.GetSection("Jwt").Bind(_jwtSettings);
+            _signInService = signInService;
+            _jwtSettings = jwtSettingsOptions.Value;
         }
 
         public async Task<TokenResponseDto> Authenticate(UserLoginDto userLoginDto)
         {
-            var result = await _signInManager.PasswordSignInAsync(
+            var result = await _signInService.PasswordSignInAsync( // Changed to _signInService
                 userLoginDto.Email, userLoginDto.Password, false, lockoutOnFailure: false);
 
             if (result.Succeeded)
@@ -60,7 +60,7 @@ namespace StockApp.Application.Services
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                await _signInService.SignInAsync(user, isPersistent: false);
                 var token = GenerateJwtToken(user);
                 return new TokenResponseDto(token, null, _jwtSettings.ExpireMinutes * 60, true);
             }
@@ -71,7 +71,7 @@ namespace StockApp.Application.Services
 
         public async Task<TokenResponseDto> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _signInService.SignOutAsync();
             return new TokenResponseDto(true, null);
         }
 

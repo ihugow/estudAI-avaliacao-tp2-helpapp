@@ -36,6 +36,7 @@ namespace StockApp.Infra.IoC
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IAuthenticateService, AuthenticateService>();
+            services.AddScoped<ISignInService, ConcreteSignInService>(); // Add this line
 
             services.AddAutoMapper(typeof(DomainToDTOMappingProfile));
 
@@ -43,9 +44,7 @@ namespace StockApp.Infra.IoC
             services.AddMediatR(myhandlers);
 
             // JWT Configuration
-            var jwtSettings = new JwtSettings();
-            configuration.GetSection("Jwt").Bind(jwtSettings);
-            services.AddSingleton(jwtSettings); // Register as singleton
+            services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 
             services.AddAuthentication(options =>
             {
@@ -60,9 +59,9 @@ namespace StockApp.Infra.IoC
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
                 };
             });
 
