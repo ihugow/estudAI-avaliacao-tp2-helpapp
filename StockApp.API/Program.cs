@@ -1,6 +1,8 @@
 using StockApp.Infra.IoC;
 using Microsoft.OpenApi.Models;
 using StockApp.API.Middlewares;
+using StockApp.Application.Services;
+using StockApp.Application.Configurations;
 
 internal class Program
 {
@@ -10,6 +12,10 @@ internal class Program
 
         // Add services to the container.
         builder.Services.AddInfrastructureAPI(builder.Configuration);
+
+        // Configure Stock Replenishment Settings
+        builder.Services.Configure<StockReplenishmentSettings>(builder.Configuration.GetSection("StockReplenishmentSettings"));
+        builder.Services.AddHostedService<StockReplenishmentService>(); // Register the background service
 
         builder.Services.AddControllers();
 
