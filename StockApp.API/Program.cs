@@ -1,5 +1,6 @@
 using StockApp.Infra.IoC;
 using Microsoft.OpenApi.Models;
+using StockApp.API.Middlewares;
 
 internal class Program
 {
@@ -43,6 +44,8 @@ internal class Program
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
+        app.UseMiddleware<ErrorHandlingMiddleware>(); // Add this line
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
