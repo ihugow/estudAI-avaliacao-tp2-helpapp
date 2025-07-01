@@ -3,6 +3,7 @@ using StockApp.Application.Interfaces;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using StockApp.Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StockApp.API.Controllers
 {
@@ -40,6 +41,7 @@ namespace StockApp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")] // Added Authorize attribute
         public async Task<ActionResult<ProductDTO>> Post([FromBody] ProductDTO productDto)
         {
             if (productDto == null)
@@ -51,6 +53,7 @@ namespace StockApp.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Put(int id, [FromBody] ProductDTO productDto)
         {
             if (id != productDto.Id)
@@ -71,6 +74,7 @@ namespace StockApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDTO>> Delete(int id)
         {
             var product = await _productService.GetByIdAsync(id);
