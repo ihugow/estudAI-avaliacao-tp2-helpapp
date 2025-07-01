@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StockApp.Application.Configurations;
-
+using StackExchange.Redis;
 
 namespace StockApp.Infra.IoC
 {
@@ -42,6 +42,10 @@ namespace StockApp.Infra.IoC
 
             var myhandlers = AppDomain.CurrentDomain.Load("StockApp.Application");
             services.AddMediatR(myhandlers);
+
+            // Redis Configuration
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(configuration.GetConnectionString("RedisConnection")));
+            services.AddScoped<ICacheService, RedisCacheService>();
 
             // JWT Configuration
             services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
